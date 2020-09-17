@@ -12,6 +12,7 @@ import os
 import numpy as np
 import pandas as pd
 import scipy
+import anndata as an
 from glob import glob
 from scipy.io import mmread
 from sklearn.preprocessing import LabelEncoder
@@ -89,6 +90,8 @@ def load_data(path, transpose=False):
     t0 = time.time()
     if os.path.isdir(path):
         count, peaks, barcode = read_mtx(path)
+    elif (os.path.isfile(path)) and ('.h5ad' in path):
+        count, peaks, barcode = read_h5ad(path)
     elif os.path.isfile(path):
         count, peaks, barcode = read_csv(path)
     else:
@@ -126,3 +129,14 @@ def read_csv(path):
     genes = data.columns.values
     barcode = data.index.values
     return scipy.sparse.csr_matrix(data.values), genes, barcode
+
+def read_h5ad(path):
+    adata = an.read(path)
+    data = None
+    if scipy.sparse.issparse(adata.X):
+        data = adata.X
+    else:
+        data = scipy.sparse.csr_matrix(adata.X)
+    genes = adata.var.index.values
+    barcode = adata.obs.index.values
+    return data, genes, barcode

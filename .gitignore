@@ -4,3 +4,4 @@ scale/*.pyc
 scale/__pycache__
 output/
 build/
+.Rproj.user
